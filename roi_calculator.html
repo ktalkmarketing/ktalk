@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор ROI - AI Протоколирование встреч</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2291FF 0%, #1a73e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2291FF 0%, #1a73e8 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .inputs-section {
+            padding: 40px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .results-section {
+            padding: 40px;
+            background: white;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2291FF;
+            font-weight: 600;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .help-text {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #2291FF;
+            box-shadow: 0 0 0 3px rgba(34, 145, 255, 0.1);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-card h3 {
+            color: #0c4a6e;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            position: relative;
+            cursor: help;
+        }
+        
+        .metric:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            background: #1f2937;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            z-index: 1000;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        
+        .metric-label {
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-weight: 700;
+            color: #059669;
+            font-size: 1.1rem;
+        }
+        
+        .total-savings {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 3px solid #10b981;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .total-savings h2 {
+            color: #065f46;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .savings-amount {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #059669;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .roi-percentage {
+            font-size: 1.5rem;
+            color: #047857;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .inputs-section {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .savings-amount {
+                font-size: 2rem;
+            }
+        }
+        
+        .category-divider {
+            border-top: 2px solid #e5e7eb;
+            margin: 30px 0 20px 0;
+            padding-top: 20px;
+        }
+        
+        .category-title {
+            font-size: 1.2rem;
+            color: #2291FF;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Калькулятор ROI</h1>
+            <p>AI-протоколирование встреч в Контур.Толк</p>
+        </div>
+        
+        <div class="content">
+            <div class="inputs-section">
+                <h2 class="section-title">📊 Параметры вашей организации</h2>
+                
+                <div class="input-group">
+                    <label for="license-cost">Стоимость 1 лицензии в год (₽)</label>
+                    <input type="number" id="license-cost" value="18700" min="1">
+                    <div class="help-text">Актуальная стоимость согласно тарифам Контур.Толк</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="licenses">Количество лицензий Контур.Толк</label>
+                    <input type="number" id="licenses" value="10" min="1">
+                    <div class="help-text">1 лицензия = 1 параллельная встреча</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="meetings-per-month">Встреч в месяц</label>
+                    <input type="number" id="meetings-per-month" value="40" min="1">
+                    <div class="help-text">Общее количество встреч, где используется AI-протоколирование</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="avg-meeting-duration">Средняя длительность встречи (минут)</label>
+                    <input type="number" id="avg-meeting-duration" value="60" min="1">
+                </div>
+                
+                <div class="category-divider">
+                    <div class="category-title">👥 Состав участников встреч</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="participants-intern">Количество стажеров на встрече</label>
+                    <input type="number" id="participants-intern" value="1" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="participants-employee">Количество линейных сотрудников</label>
+                    <input type="number" id="participants-employee" value="2" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="participants-specialist">Количество ведущих специалистов</label>
+                    <input type="number" id="participants-specialist" value="1" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="participants-manager">Количество руководителей</label>
+                    <input type="number" id="participants-manager" value="1" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="avg-participants">Общее количество участников (автосумма)</label>
+                    <input type="number" id="avg-participants" value="5" min="1" readonly style="background-color: #f3f4f6;">
+                    <div class="help-text">Рассчитывается автоматически из состава выше</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="absent-percentage">% пропускающих встречи</label>
+                    <input type="number" id="absent-percentage" value="30" min="0" max="100">
+                    <div class="help-text">По исследованиям: 25-40% сотрудников пропускают регулярные встречи</div>
+                </div>
+                
+                <div class="category-divider">
+                    <div class="category-title">💰 Зарплатные ставки (₽/час)</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="salary-intern">Стажер</label>
+                    <input type="number" id="salary-intern" value="300" min="0">
+                    <div class="help-text">Средняя ставка: 250-400₽/час</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="salary-employee">Линейный сотрудник</label>
+                    <input type="number" id="salary-employee" value="800" min="0">
+                    <div class="help-text">Средняя ставка: 600-1200₽/час</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="salary-specialist">Ведущий специалист</label>
+                    <input type="number" id="salary-specialist" value="1500" min="0">
+                    <div class="help-text">Средняя ставка: 1200-2000₽/час</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="salary-manager">Руководитель</label>
+                    <input type="number" id="salary-manager" value="2500" min="0">
+                    <div class="help-text">Средняя ставка: 2000-4000₽/час</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="avg-salary">Средневзвешенная ставка участников (₽/час)</label>
+                    <input type="number" id="avg-salary" value="1200" min="0" readonly style="background-color: #f3f4f6;">
+                    <div class="help-text">Рассчитывается автоматически на основе состава участников</div>
+                </div>
+                
+                <div class="category-divider">
+                    <div class="category-title">⚡ Дополнительные факторы эффективности</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="rework-percentage">% задач, которые переделываются из-за недопонимания</label>
+                    <input type="number" id="rework-percentage" value="10" min="0" max="50">
+                    <div class="help-text">Когда задачи из встреч поняты неправильно и их приходится делать заново. Среднее значение: 5-15%</div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title">💵 Расчет экономии</h2>
+                
+                <div class="result-card">
+                    <h3>🕒 Экономия времени</h3>
+                    <div class="metric">
+                        <span class="metric-label">Время на создание протокола вручную:</span>
+                        <span class="metric-value" id="manual-protocol-time">-</span>
+                        <div class="tooltip">
+                            Формула: Встреч × (15 мин ручной работы - 2 мин AI) ÷ 60<br>
+                            15 мин = поиск ответственного (3 мин) + запись решений (7 мин) + оформление (5 мин)
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Экономия времени на изучении протоколов:</span>
+                        <span class="metric-value" id="reading-time-saved">-</span>
+                        <div class="tooltip">
+                            Формула: Встреч × (Участники + Отсутствующие) × (5 мин обычное чтение - 2 мин AI-резюме) ÷ 60<br>
+                            AI-резюме в 2-3 раза короче и структурированнее обычных записей встреч
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Общая экономия времени в месяц:</span>
+                        <span class="metric-value" id="total-time-saved">-</span>
+                        <div class="tooltip">
+                            Формула: Экономия на протоколах + Экономия на чтении + Экономия от снижения переделок<br>
+                            Переделки = Встреч × Участников × Длительность × % переделок ÷ 60
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>💰 Экономия затрат</h3>
+                    <div class="metric">
+                        <span class="metric-label">Экономия на протоколировании:</span>
+                        <span class="metric-value" id="protocol-cost-saved">-</span>
+                        <div class="tooltip">
+                            Формула: Время экономии на протоколах × Средневзвешенная ставка участников<br>
+                            Обычно протокол ведет один из участников встречи
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Экономия на изучении материалов:</span>
+                        <span class="metric-value" id="study-cost-saved">-</span>
+                        <div class="tooltip">
+                            Формула: Время экономии на чтении × Средневзвешенная ставка участников<br>
+                            Все участники + отсутствующие изучают материалы встреч
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Экономия от снижения переделок:</span>
+                        <span class="metric-value" id="rework-cost-saved">-</span>
+                        <div class="tooltip">
+                            Формула: Встреч × Участников × Длительность × % переделок × Средняя ставка<br>
+                            Четкие AI-протоколы снижают количество недопониманий и переделок
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Общая экономия в месяц:</span>
+                        <span class="metric-value" id="total-monthly-savings">-</span>
+                        <div class="tooltip">
+                            Формула: Сумма всех видов экономии выше<br>
+                            Протоколирование + Изучение + Снижение переделок
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>📈 Стоимость решения</h3>
+                    <div class="metric">
+                        <span class="metric-label">Стоимость лицензий в месяц:</span>
+                        <span class="metric-value" id="monthly-cost">-</span>
+                        <div class="tooltip">
+                            Формула: Количество лицензий × Стоимость лицензии ÷ 12 месяцев<br>
+                            1 лицензия = 1 параллельная встреча с AI-функциями
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Стоимость лицензий в год:</span>
+                        <span class="metric-value" id="annual-cost">-</span>
+                        <div class="tooltip">
+                            Формула: Количество лицензий × Стоимость лицензии<br>
+                            Актуальная стоимость согласно тарифам Контур.Толк
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="total-savings">
+                    <h2>🎯 Итоговая выгода</h2>
+                    <div class="savings-amount" id="net-annual-savings">0₽</div>
+                    <div class="roi-percentage">ROI: <span id="roi-value">0%</span></div>
+                    <div style="margin-top: 15px; color: #047857; font-weight: 600;">
+                        Окупаемость: <span id="payback-period">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateROI() {
+            // Получаем значения из формы
+            const licenseCost = parseFloat(document.getElementById('license-cost').value) || 18700;
+            const licenses = parseFloat(document.getElementById('licenses').value) || 0;
+            const meetingsPerMonth = parseFloat(document.getElementById('meetings-per-month').value) || 0;
+            const avgMeetingDuration = parseFloat(document.getElementById('avg-meeting-duration').value) || 0;
+            const absentPercentage = parseFloat(document.getElementById('absent-percentage').value) || 0;
+            const reworkPercentage = parseFloat(document.getElementById('rework-percentage').value) || 0;
+            
+            // Участники по должностям
+            const participantsIntern = parseFloat(document.getElementById('participants-intern').value) || 0;
+            const participantsEmployee = parseFloat(document.getElementById('participants-employee').value) || 0;
+            const participantsSpecialist = parseFloat(document.getElementById('participants-specialist').value) || 0;
+            const participantsManager = parseFloat(document.getElementById('participants-manager').value) || 0;
+            
+            // Зарплаты по должностям
+            const salaryIntern = parseFloat(document.getElementById('salary-intern').value) || 0;
+            const salaryEmployee = parseFloat(document.getElementById('salary-employee').value) || 0;
+            const salarySpecialist = parseFloat(document.getElementById('salary-specialist').value) || 0;
+            const salaryManager = parseFloat(document.getElementById('salary-manager').value) || 0;
+            
+            // Обновляем общее количество участников
+            const avgParticipants = participantsIntern + participantsEmployee + participantsSpecialist + participantsManager;
+            document.getElementById('avg-participants').value = avgParticipants;
+            
+            // Расчет средневзвешенной ставки участников
+            const totalSalaryWeight = 
+                (participantsIntern * salaryIntern) + 
+                (participantsEmployee * salaryEmployee) + 
+                (participantsSpecialist * salarySpecialist) + 
+                (participantsManager * salaryManager);
+            
+            const weightedAvgSalary = avgParticipants > 0 ? totalSalaryWeight / avgParticipants : 0;
+            document.getElementById('avg-salary').value = Math.round(weightedAvgSalary);
+            const avgSalary = weightedAvgSalary;
+            
+            // Константы с обоснованием
+            const MANUAL_PROTOCOL_TIME = 15; // минут: поиск ответственного (2-3 мин) + запись основных решений (5-7 мин) + оформление и рассылка (5-8 мин)
+            const AI_PROTOCOL_TIME = 2; // минут на обработку AI (автоматически)
+            const FULL_PROTOCOL_READING_TIME = 5; // минут на чтение обычных записей встреч (по вашим данным: 2-5 мин)
+            const AI_SUMMARY_READING_TIME = 2; // минуты на чтение структурированного AI-резюме
+            
+            // Расчеты экономии времени
+            const protocolTimeSaved = MANUAL_PROTOCOL_TIME - AI_PROTOCOL_TIME; // минут на встречу
+            const readingTimeSavedPerPerson = FULL_PROTOCOL_READING_TIME - AI_SUMMARY_READING_TIME; // минут на человека
+            
+            // Количество людей, изучающих протоколы
+            const absentPeople = Math.round(avgParticipants * absentPercentage / 100);
+            const peopleReadingProtocols = avgParticipants + absentPeople; // присутствующие + отсутствующие
+            
+            // Общая экономия времени в месяц (в часах)
+            const monthlyProtocolTimeSaved = (meetingsPerMonth * protocolTimeSaved) / 60;
+            const monthlyReadingTimeSaved = (meetingsPerMonth * peopleReadingProtocols * readingTimeSavedPerPerson) / 60;
+            const totalMonthlyTimeSaved = monthlyProtocolTimeSaved + monthlyReadingTimeSaved;
+            
+            // Экономия от снижения переделок
+            const avgProjectTimePerMeeting = avgMeetingDuration / 60 * avgParticipants; // человеко-часов на встречу
+            const reworkTimeSaved = meetingsPerMonth * avgProjectTimePerMeeting * reworkPercentage / 100;
+            
+            // Общая экономия времени с учетом переделок
+            const totalTimeSavedWithRework = totalMonthlyTimeSaved + reworkTimeSaved;
+            
+            // Финансовая экономия
+            const protocolCostSaved = monthlyProtocolTimeSaved * avgSalary;
+            const studyCostSaved = monthlyReadingTimeSaved * avgSalary;
+            const reworkCostSaved = reworkTimeSaved * avgSalary;
+            const totalMonthlySavings = protocolCostSaved + studyCostSaved + reworkCostSaved;
+            
+            // Стоимость решения
+            const monthlyCost = (licenses * licenseCost) / 12;
+            const annualCost = licenses * licenseCost;
+            
+            // Чистая выгода
+            const netMonthlySavings = totalMonthlySavings - monthlyCost;
+            const netAnnualSavings = netMonthlySavings * 12;
+            
+            // ROI и окупаемость
+            const roi = annualCost > 0 ? (netAnnualSavings / annualCost * 100) : 0;
+            const paybackMonths = monthlyCost > 0 ? (annualCost / (totalMonthlySavings || 1)) : 0;
+            
+            // Обновляем интерфейс
+            document.getElementById('manual-protocol-time').textContent = `${Math.round(monthlyProtocolTimeSaved)} ч/мес`;
+            document.getElementById('reading-time-saved').textContent = `${Math.round(monthlyReadingTimeSaved)} ч/мес`;
+            document.getElementById('total-time-saved').textContent = `${Math.round(totalTimeSavedWithRework)} ч/мес`;
+            
+            document.getElementById('protocol-cost-saved').textContent = `${Math.round(protocolCostSaved).toLocaleString()}₽/мес`;
+            document.getElementById('study-cost-saved').textContent = `${Math.round(studyCostSaved).toLocaleString()}₽/мес`;
+            document.getElementById('rework-cost-saved').textContent = `${Math.round(reworkCostSaved).toLocaleString()}₽/мес`;
+            document.getElementById('total-monthly-savings').textContent = `${Math.round(totalMonthlySavings).toLocaleString()}₽/мес`;
+            
+            document.getElementById('monthly-cost').textContent = `${Math.round(monthlyCost).toLocaleString()}₽/мес`;
+            document.getElementById('annual-cost').textContent = `${Math.round(annualCost).toLocaleString()}₽/год`;
+            
+            document.getElementById('net-annual-savings').textContent = `${Math.round(netAnnualSavings).toLocaleString()}₽/год`;
+            document.getElementById('roi-value').textContent = `${Math.round(roi)}%`;
+            
+            if (paybackMonths < 12) {
+                document.getElementById('payback-period').textContent = `${Math.round(paybackMonths)} мес`;
+            } else {
+                document.getElementById('payback-period').textContent = `${Math.round(paybackMonths/12 * 10)/10} лет`;
+            }
+        }
+        
+        // Добавляем обработчики событий для всех полей ввода
+        const inputs = document.querySelectorAll('input[type="number"]:not([readonly])');
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateROI);
+        });
+        
+        // Первоначальный расчет
+        calculateROI();
+    </script>
+</body>
+</html>
